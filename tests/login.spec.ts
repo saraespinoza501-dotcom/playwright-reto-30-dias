@@ -1,6 +1,8 @@
 import {expect,test} from '@playwright/test'
 
-test('login to hrm', async({page}) => {
+test.describe('login casos positivos y negativos', () => {
+
+    test('login to hrm', async({page}) => {
 
     await page.goto('https://opensource-demo.orangehrmlive.com/')
     await page.getByRole('textbox', {name: 'Username'}).fill('Admin')
@@ -14,7 +16,7 @@ test('login to hrm', async({page}) => {
 
 
 })
-test('login password invalido', async({page}) => {
+    test('login password invalido', async({page}) => {
 
     await page.goto('https://opensource-demo.orangehrmlive.com/')
     await page.getByRole('textbox', {name: 'Username'}).fill('Admin')
@@ -25,5 +27,7 @@ test('login password invalido', async({page}) => {
 
   await expect(page.getByText('Invalid credentials')).toBeVisible()
 
+
+})
 
 })
