@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+test.describe('Menu Lateral', ()=>{
+
 // Nombre del test
 test('Check left menu options', async ({ page }) => {
 
@@ -63,6 +65,34 @@ test('Check left menu options', async ({ page }) => {
   // 12. Comparar que el menú actual coincide con el esperado
   expect(currentMenuItems).toEqual(expectedMenuItems);
 });
+
+test('Navigate though teh left panel', async ({page})=>{
+
+  await page.goto('https://opensource-demo.orangehrmlive.com/');
+  await page.getByRole('textbox', { name: 'Username' }).fill('Admin'); 
+  await page.getByRole('textbox', { name: 'Password' }).fill('admin123');  
+  await page.getByRole('button', { name: 'Login' }).click();
+
+  await expect(page.getByRole('link', { name: 'Admin' })).toBeVisible();
+
+  const leftMenuItems = page.getByLabel('Sidepanel').getByRole('listitem');  
+  const currentMenuItemsCount = await leftMenuItems.count();
+
+  for(let i= 0; i<currentMenuItemsCount; i++){
+    const menuItem = leftMenuItems.nth(i)
+    const menuText = await menuItem.innerText()
+
+    console.log('Current menu item', menuText)
+     // Cuando el texto sea "Maintenance", hacer clic y volver atrás
+    if (menuText === 'Maintenance') {
+      await menuItem.click();
+      await page.goBack();
+    }
+  }
+
+  })
+})
+
 
 
 /*import {test, expect} from '@playwright/test'
