@@ -34,9 +34,38 @@ test('Get all the employee names registered', async ({page}) => {
             employeeNames.push(employeeName);
         }
     }
-
+    
 console.log(employeeNames)
 })
+
+test('Select specific user for edition', async ({page}) => {
+
+    const userForEdition = 'abcda';
+    await page.goto('https://opensource-demo.orangehrmlive.com/');
+    await page.getByRole('textbox', {name: 'Username'}).fill('Admin');
+    await page.getByRole('textbox', {name: 'Password'}).fill('admin123');
+    await page.getByRole('button', {name: 'Login'}).click();
+
+    await expect(page.getByRole('link', {name: 'Admin'})).toBeVisible();
+    await page.getByRole('link', {name: 'Admin'}).click();
+    await page.getByRole('navigation', {name: 'Topbar Menu'}).getByText('user Management').click();
+    await page.getByRole('menuitem', {name: 'users'}).click();
+
+    const pencilToEdit = page
+        .locator('.oxd-table-card .oxd-table-row')
+        .filter({ hasText: userForEdition })
+        .locator('button')
+        .filter({ has: page.locator('i.bi-pencil-fill') });
+
+    await pencilToEdit.click();
+
+    await page.locator('.oxd-input').nth(1).click();
+    const currentUsername = await page.locator('.oxd-input').nth(1).inputValue();
+
+    expect(currentUsername).toEqual(userForEdition);
+});
+
+
 /*import {expect, test} from "@playwright/test"
 test('Get all the usernames registered', async ({page}) => {
     await page.goto('https://opensource-demo.orangehrmlive.com/')
