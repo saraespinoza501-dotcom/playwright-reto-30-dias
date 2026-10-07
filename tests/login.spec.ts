@@ -1,27 +1,24 @@
 import {expect,test} from '@playwright/test'
+import { LoginPage } from "../pageobjects.ts/LoginPage"
+import { SideMenuOption, SidePanel } from '../components/SidePanel'
 
 test.describe('login casos positivos y negativos', () => {
 
     test('login to hrm', async({page}) => {
+       const loginPage = new LoginPage(page)
+       await loginPage.doLogin('Admin', 'admin123')
 
-    await page.goto('https://opensource-demo.orangehrmlive.com/')
-    await page.getByRole('textbox', {name: 'Username'}).fill('Admin')
-    await page.getByRole('textbox', {name: 'Password'}).fill('admin123')
-    await page.getByRole ('button', {name: 'Login'}).click()
-
-    // para hacer una asercion, es decir validar que algo esta alli
-
-   await expect(page.getByRole('link', {name: 'Admin'})).toBeVisible()
-
-
+       const sidePanel = new SidePanel (page)
+       await sidePanel.clickonOption(SideMenuOption.ADMIN)
+       await sidePanel.clickonOption(SideMenuOption.LEAVE)
+       await sidePanel.clickonOption(SideMenuOption.MAINTENANCE)
 
 })
     test('login password invalido', async({page}) => {
+      const loginPage = new LoginPage(page)
+      await loginPage.doLogin('Admin', 'admin124')
 
-    await page.goto('https://opensource-demo.orangehrmlive.com/')
-    await page.getByRole('textbox', {name: 'Username'}).fill('Admin')
-    await page.getByRole('textbox', {name: 'Password'}).fill('12n6')
-    await page.getByRole ('button', {name: 'Login'}).click()
+
 
     // para hacer una asercion, es decir validar que algo esta alli
 
