@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pageobjects.ts/LoginPage';
+import { TopBarMenu } from '../components/top-bar-menu/TopBarMenu';
+import { SideMenuOption, SidePanel } from '../components/SidePanel';
 
 test.describe('Menu Lateral', ()=>{
 
@@ -169,6 +172,26 @@ test('check all Organization', async({page}) => {
    }
 })
 
+test ('testing topbar menu', async({page}) => {
+
+  const loginPage = new LoginPage(page)
+  await loginPage.loginAsAdmin()
+
+  const sidePanel = new SidePanel(page)
+  await sidePanel.clickonOption(SideMenuOption.ADMIN)
+
+  const topBarMenu = new TopBarMenu(page)
+  await topBarMenu.job.clicKOnJobTitles()
+  await topBarMenu.job.clicKOnPayGrades()
+
+  await topBarMenu.userManagement.clickOnUsers()
+
+  await topBarMenu.organization.clicKOnGeneralInformationOption()
+  await topBarMenu.organization.clicKOnLocation()
+
+
+
+})
 })
 
 

@@ -1,5 +1,3 @@
-import process from "node:process";
-
 export class Environment {
 
     static readonly ADMIN_USERNAME = Environment.getRequired('ADMIN_USERNAME');
