@@ -93,6 +93,7 @@ test('Filter by user admin', async ({ page }) => {
     const loginPage = new LoginPage(page)
     await loginPage.loginAsAdmin()
 
+
     const sidePanel = new SidePanel(page)
     await sidePanel.clickonOption(SideMenuOption.ADMIN)
 
