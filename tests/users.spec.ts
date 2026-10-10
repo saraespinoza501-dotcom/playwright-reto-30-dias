@@ -145,60 +145,58 @@ test('Filter by user admin', async ({ page }) => {
     }
 })
 
-
 test('capture all amounts', async ({ page }) => {
 
-  // PASO 1: Abrir la página de claims (la URL base está en playwright.config.ts)
+  // PASO 1: Abrir la página de claims
   await page.goto('/web/index.php/claim/viewAssignClaim')
 
-  // PASO 2: Describir dónde están las filas de datos de la tabla.
-  // table → rowgroup (nth(1) = cuerpo; el 0 sería la cabecera) → row (cada fila).
-  // Esto todavía no busca nada: solo define el locator.
+  // PASO 2: Definir dónde están las filas del cuerpo de la tabla
   const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
 
-  // PASO 3: Esperar a que aparezca la primera fila (hasta 15 segundos).
-  // Es necesario porque la tabla carga después que la página.
+  // PASO 3: Esperar a que carguen los datos (hasta 15 segundos)
   await expect(allBodyRows.first()).toBeVisible({ timeout: 15000 })
 
-  // PASO 4: Contar cuántas filas hay y comprobar que hay al menos una.
-  // Si no hay filas, el test falla en lugar de pasar en falso.
+  // PASO 4: Contar las filas y exigir que haya al menos una
   const rowCount = await allBodyRows.count()
   console.log('Number of rows', rowCount)
   expect(rowCount).toBeGreaterThan(0)
 
-  // PASO 5: Crear una lista vacía donde guardar los importes como números
+  // PASO 5: Lista vacía para guardar los importes
   const amounts: number[] = []
 
-  // PASO 6: Recorrer las filas una por una (de la 0 a la última)
+  // PASO 6: Recorrer las filas, leer el importe y convertirlo a número
   for (let i = 0; i < rowCount; i++) {
-
-    // 6.1: Leer el texto de la celda 7 (columna Amount) de la fila i.
-    // Devuelve texto, por ejemplo "3,570,000.00", o null si no hay nada.
     const amountText = await allBodyRows.nth(i).getByRole('cell').nth(7).textContent()
     console.log('Amount in text:', amountText)
 
-    // 6.2: Si la celda está vacía, saltar a la siguiente fila
     if (amountText === null || amountText.trim() === '') continue
 
-    // 6.3: Convertir el texto a número:
-    //      quitar las comas ("3,570,000.00" → "3570000.00"),
-    //      quitar espacios y pasar a número decimal (3570000)
     const converted = parseFloat(amountText.replace(/,/g, '').trim())
-
-    // 6.4: Guardar el número en la lista
     amounts.push(converted)
   }
 
-  // PASO 7: Mostrar la lista de importes
+  // PASO 7: Mostrar la lista y validar que no hay NaN
   console.log(amounts)
-
-  // PASO 8: Validar que ningún importe se convirtió mal (NaN = "no es un número")
   expect(amounts.every(a => !Number.isNaN(a))).toBe(true)
 
-  // PASO 9: Sumar todos los importes (empezando desde 0) y mostrar el total
-  // con 2 decimales
+  // PASO 8: Calcular el total (suma)
   const total = amounts.reduce((sum, amount) => sum + amount, 0)
+
+  // PASO 9 (NUEVO): Valor máximo y mínimo.
+  // Math.max / Math.min no aceptan un array directamente,
+  // por eso se usa "...amounts" (spread), que lo abre en valores sueltos.
+  const maxAmount = Math.max(...amounts)
+  const minAmount = Math.min(...amounts)
+
+  // PASO 10 (NUEVO): Total de registros.
+  // amounts.length son los importes válidos leídos; rowCount son las filas de la tabla.
+  const totalRecords = amounts.length
+
+  // PASO 11: Mostrar los resultados
   console.log('total is', total.toFixed(2))
+  console.log('max is', maxAmount.toFixed(2))          // NUEVO
+  console.log('min is', minAmount.toFixed(2))          // NUEVO
+  console.log('total records', totalRecords)           // NUEVO
 })
 
 
