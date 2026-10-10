@@ -146,6 +146,63 @@ test('Filter by user admin', async ({ page }) => {
 })
 
 
+test('capture all amounts', async ({ page }) => {
+
+  // PASO 1: Abrir la página de claims (la URL base está en playwright.config.ts)
+  await page.goto('/web/index.php/claim/viewAssignClaim')
+
+  // PASO 2: Describir dónde están las filas de datos de la tabla.
+  // table → rowgroup (nth(1) = cuerpo; el 0 sería la cabecera) → row (cada fila).
+  // Esto todavía no busca nada: solo define el locator.
+  const allBodyRows = page.getByRole('table').getByRole('rowgroup').nth(1).getByRole('row')
+
+  // PASO 3: Esperar a que aparezca la primera fila (hasta 15 segundos).
+  // Es necesario porque la tabla carga después que la página.
+  await expect(allBodyRows.first()).toBeVisible({ timeout: 15000 })
+
+  // PASO 4: Contar cuántas filas hay y comprobar que hay al menos una.
+  // Si no hay filas, el test falla en lugar de pasar en falso.
+  const rowCount = await allBodyRows.count()
+  console.log('Number of rows', rowCount)
+  expect(rowCount).toBeGreaterThan(0)
+
+  // PASO 5: Crear una lista vacía donde guardar los importes como números
+  const amounts: number[] = []
+
+  // PASO 6: Recorrer las filas una por una (de la 0 a la última)
+  for (let i = 0; i < rowCount; i++) {
+
+    // 6.1: Leer el texto de la celda 7 (columna Amount) de la fila i.
+    // Devuelve texto, por ejemplo "3,570,000.00", o null si no hay nada.
+    const amountText = await allBodyRows.nth(i).getByRole('cell').nth(7).textContent()
+    console.log('Amount in text:', amountText)
+
+    // 6.2: Si la celda está vacía, saltar a la siguiente fila
+    if (amountText === null || amountText.trim() === '') continue
+
+    // 6.3: Convertir el texto a número:
+    //      quitar las comas ("3,570,000.00" → "3570000.00"),
+    //      quitar espacios y pasar a número decimal (3570000)
+    const converted = parseFloat(amountText.replace(/,/g, '').trim())
+
+    // 6.4: Guardar el número en la lista
+    amounts.push(converted)
+  }
+
+  // PASO 7: Mostrar la lista de importes
+  console.log(amounts)
+
+  // PASO 8: Validar que ningún importe se convirtió mal (NaN = "no es un número")
+  expect(amounts.every(a => !Number.isNaN(a))).toBe(true)
+
+  // PASO 9: Sumar todos los importes (empezando desde 0) y mostrar el total
+  // con 2 decimales
+  const total = amounts.reduce((sum, amount) => sum + amount, 0)
+  console.log('total is', total.toFixed(2))
+})
+
+
+
 /*test('Filter by user admin', async ({ page }) => {
     const loginPage = new LoginPage(page)
     await loginPage.loginAsAdmin()
