@@ -1,4 +1,5 @@
-import { Locator, Page } from "@playwright/test"
+import { expect, Locator, Page } from "@playwright/test"
+import { UserModel } from "../models/UserModel"
 
 export class AddNewUserPage {
 
@@ -12,6 +13,7 @@ export class AddNewUserPage {
   readonly confirmPasswordInput: Locator
   readonly saveButton: Locator
   readonly successMessage: Locator
+  readonly confirmPasswordError: Locator
 
   constructor(page: Page) {
     this.page = page
@@ -43,6 +45,10 @@ export class AddNewUserPage {
     this.saveButton = page.getByRole('button', { name: 'Save' })
 
     this.successMessage = page.locator('p.oxd-text--toast-message')
+    
+    this.confirmPasswordError = page.locator('div.oxd-grid-item--gutters')
+    .filter({ has: page.getByText('Confirm Password', { exact: true }) })
+    .locator('span.oxd-input-field-error-message')
   }
 
   async clickOnAdd() {
@@ -83,4 +89,22 @@ export class AddNewUserPage {
   async getSuccessMessage() {
     return await this.successMessage.textContent()
   }
+
+  async addNewUser(user: UserModel) {
+      await this.clickOnAdd()
+      await this.selectUserRole(user.role)
+      await this.selectEmployee(user.employeeName)
+      await this.selectStatus(user.status)
+      await this.enterUsername(user.username)
+      await this.enterPassword(user.password)
+      await this.enterConfirmPassword(user.confirmPassword)
+      await this.clickOnSave()
+
+  }
+
+  async expectPasswordMismatchError() {
+  await expect(this.confirmPasswordError).toHaveText(/do not match/i)
 }
+
+}
+

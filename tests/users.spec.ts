@@ -4,6 +4,7 @@ import { SideMenuOption, SidePanel } from "../components/SidePanel"
 import { TopBarMenu } from "../components/top-bar-menu/TopBarMenu"
 import { Navigate } from "../pageobjects.ts/Navigate"
 import { AddNewUserPage } from "../pageobjects.ts/AddNewUserPage"
+import { UserModel } from "../models/UserModel"
 test('Get all the employee names registered', async ({page}) => {
  
     const loginPage = new LoginPage(page)
@@ -218,17 +219,53 @@ test('Add new user', async ({ page }) => {
   const topBarMenu = new TopBarMenu(page)
   await topBarMenu.userManagement.clickOnUsers()
 
+  const userToAdd = {
+    username: randomUsername,
+    employeeName: employeeToSearch,
+    confirmPassword: password,
+    password: password,
+    role: 'ESS',
+    status: 'Enabled'
+
+  }
+
   const addNewUserPage = new AddNewUserPage(page)
-  await addNewUserPage.clickOnAdd()
-  await addNewUserPage.selectUserRole('ESS')
-  await addNewUserPage.selectEmployee(employeeToSearch)
-  await addNewUserPage.selectStatus('Enabled')
-  await addNewUserPage.enterUsername(randomUsername)
-  await addNewUserPage.enterPassword(password)
-  await addNewUserPage.enterConfirmPassword(password)
-  await addNewUserPage.clickOnSave()
+    await addNewUserPage.addNewUser(userToAdd)
+    await addNewUserPage.getSuccessMessage()
+
+ 
 
   await expect(addNewUserPage.successMessage).toHaveText(/successfully saved/i)
+})
+
+test('Add new user with mismatched passwords', async ({ page }) => {
+    const randomUsername = 'goku' + crypto.randomUUID().slice(0, 8)
+    const password = 'R4dom45..*'
+    const employeeToSearch = 'Qwerty Qwerty LName'
+  
+
+  const userToAdd: UserModel = {
+    username: randomUsername,
+    employeeName: employeeToSearch, 
+    role: 'ESS',
+    status: 'Enabled',
+    password: password,
+    confirmPassword: 'R4dom45..***'   // no coincide a propósito
+  }
+
+  const navigate = new Navigate(page)
+  await navigate.toDashboard()
+
+  const sidePanel = new SidePanel(page)
+  await sidePanel.clickonOption(SideMenuOption.ADMIN)
+
+  const topBarMenu = new TopBarMenu(page)
+  await topBarMenu.userManagement.clickOnUsers()
+
+  const addNewUserPage = new AddNewUserPage(page)
+  await addNewUserPage.addNewUser(userToAdd)
+
+  await addNewUserPage.expectPasswordMismatchError()
 })
 
 /*test('Filter by user admin', async ({ page }) => {
