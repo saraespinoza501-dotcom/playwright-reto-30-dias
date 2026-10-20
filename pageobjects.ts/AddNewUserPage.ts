@@ -106,10 +106,12 @@ export class AddNewUserPage {
   async expectPasswordMismatchError() {
   await expect(this.confirmPasswordError).toHaveText(/do not match/i)
 }
+async checkUserWasSuccessfullyDeletedMessage() {
+    await expect(this.successMessage).toHaveText(/successfully deleted/i)
+}
 async checkUserWasAddedMessage() {
     await expect(this.successMessage).toHaveText(/successfully saved/i)
 }
-
 async getEmployeeName(): Promise<string> {
     await expect(this.employeeInput).not.toHaveValue('')   // espera a que el campo se llene
     const fullUserToSearch = await this.employeeInput.inputValue()

@@ -275,17 +275,11 @@ test('Add new user with mismatched passwords', async ({ page }) => {
   await addNewUserPage.expectPasswordMismatchError()
 })
 
-test('Add new user admin', async ({ page }) => {
+test('Add new user admin @users', async ({ page }) => {
     test.setTimeout(90_000)
 
     const navigate = new Navigate(page)
-    await navigate.toDashboard()
-
-    const sidePanel = new SidePanel(page)
-    await sidePanel.clickonOption(SideMenuOption.ADMIN)
-
-    const topBarMenu = new TopBarMenu(page)
-    await topBarMenu.userManagement.clickOnUsers()
+    await navigate.toUsers()
 
     const usersTable = new Usertable(page)
     await usersTable.editFirstAdminOnTheTable()
@@ -301,6 +295,45 @@ test('Add new user admin', async ({ page }) => {
 
     await addNewUserPage.addNewUser(adminUser)
     await addNewUserPage.checkUserWasAddedMessage()
+})
+test('Delete user admin @users', async ({ page }) => {
+    //Arrange
+    test.setTimeout(90_000)
+
+    const navigate = new Navigate(page)
+    await navigate.toUsers()
+
+    const usersTable = new Usertable(page)
+    await usersTable.editFirstAdminOnTheTable()
+
+    const addNewUserPage = new AddNewUserPage(page)
+    const fullUserToSearch = await addNewUserPage.getEmployeeName()   // en la pantalla de editar
+
+    const adminUser = UserFactory.createAdmin({
+        employeeName: fullUserToSearch
+    })
+
+    await page.goBack()
+    await addNewUserPage.addNewUser(adminUser)
+    await addNewUserPage.checkUserWasAddedMessage()
+    await usersTable.searchByUsername(adminUser.username) 
+    await usersTable.expectUserToBeInTable(adminUser.username)
+
+    //Act
+
+    await usersTable.clickOnDeleteActionByUsername(adminUser.username)   
+    await usersTable.acceptDeleteUser() 
+
+     
+    
+    //Assert
+   await addNewUserPage.checkUserWasSuccessfullyDeletedMessage()
+await usersTable.expectUserNotInTable(adminUser.username) 
+     
+
+
+
+
 })
 /*test('Filter by user admin', async ({ page }) => {
     const loginPage = new LoginPage(page)
