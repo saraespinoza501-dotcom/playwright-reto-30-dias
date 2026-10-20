@@ -45,7 +45,7 @@ export class AddNewUserPage {
     this.saveButton = page.getByRole('button', { name: 'Save' })
 
     this.successMessage = page.locator('p.oxd-text--toast-message')
-    
+
     this.confirmPasswordError = page.locator('div.oxd-grid-item--gutters')
     .filter({ has: page.getByText('Confirm Password', { exact: true }) })
     .locator('span.oxd-input-field-error-message')
@@ -58,6 +58,7 @@ export class AddNewUserPage {
   async selectUserRole(role: string) {
     await this.userRoleDropdown.click()
     await this.page.getByRole('option', { name: role }).click()
+   
   }
 
   async selectEmployee(employeeName: string) {
@@ -105,6 +106,15 @@ export class AddNewUserPage {
   async expectPasswordMismatchError() {
   await expect(this.confirmPasswordError).toHaveText(/do not match/i)
 }
+async checkUserWasAddedMessage() {
+    await expect(this.successMessage).toHaveText(/successfully saved/i)
+}
 
+async getEmployeeName(): Promise<string> {
+    await expect(this.employeeInput).not.toHaveValue('')   // espera a que el campo se llene
+    const fullUserToSearch = await this.employeeInput.inputValue()
+    console.log(`User to search: ${fullUserToSearch}`)
+    return fullUserToSearch
+}
 }
 

@@ -5,6 +5,8 @@ import { TopBarMenu } from "../components/top-bar-menu/TopBarMenu"
 import { Navigate } from "../pageobjects.ts/Navigate"
 import { AddNewUserPage } from "../pageobjects.ts/AddNewUserPage"
 import { UserModel } from "../models/UserModel"
+import { UserFactory } from "../factory/UserFactory"
+import { Usertable } from "../components/UserTable"
 test('Get all the employee names registered', async ({page}) => {
  
     const loginPage = new LoginPage(page)
@@ -219,7 +221,7 @@ test('Add new user', async ({ page }) => {
   const topBarMenu = new TopBarMenu(page)
   await topBarMenu.userManagement.clickOnUsers()
 
-  const userToAdd = {
+  /*const userToAdd = {
     username: randomUsername,
     employeeName: employeeToSearch,
     confirmPassword: password,
@@ -227,10 +229,15 @@ test('Add new user', async ({ page }) => {
     role: 'ESS',
     status: 'Enabled'
 
-  }
+  }*/
+
+    const adminUser = UserFactory.createAdmin({
+      
+        employeeName: 'manda akhil user',
+    })
 
   const addNewUserPage = new AddNewUserPage(page)
-    await addNewUserPage.addNewUser(userToAdd)
+    await addNewUserPage.addNewUser(adminUser)
     await addNewUserPage.getSuccessMessage()
 
  
@@ -268,6 +275,33 @@ test('Add new user with mismatched passwords', async ({ page }) => {
   await addNewUserPage.expectPasswordMismatchError()
 })
 
+test('Add new user admin', async ({ page }) => {
+    test.setTimeout(90_000)
+
+    const navigate = new Navigate(page)
+    await navigate.toDashboard()
+
+    const sidePanel = new SidePanel(page)
+    await sidePanel.clickonOption(SideMenuOption.ADMIN)
+
+    const topBarMenu = new TopBarMenu(page)
+    await topBarMenu.userManagement.clickOnUsers()
+
+    const usersTable = new Usertable(page)
+    await usersTable.editFirstAdminOnTheTable()
+
+    const addNewUserPage = new AddNewUserPage(page)
+    const fullUserToSearch = await addNewUserPage.getEmployeeName()   // en la pantalla de editar
+
+    const adminUser = UserFactory.createAdmin({
+        employeeName: fullUserToSearch
+    })
+
+    await page.goBack()
+
+    await addNewUserPage.addNewUser(adminUser)
+    await addNewUserPage.checkUserWasAddedMessage()
+})
 /*test('Filter by user admin', async ({ page }) => {
     const loginPage = new LoginPage(page)
     await loginPage.loginAsAdmin()
