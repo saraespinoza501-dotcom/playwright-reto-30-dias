@@ -1,37 +1,64 @@
-name: Playwright Tests
+name: Playwright Tests Updated
+
 on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
   workflow_dispatch:
     inputs:
       grep:
-        description: 'Nombre del test a ejecutar (opcional)'
+        description: "Campo opcional para filtrar los tests de playwright"
         required: false
+        default: ''
+        type: string
+      project:
+        description: "Selecciona el proyecto de playwright"
+        required: true
+        default: "admin"
+        type: choice
+        options:
+          - admin
+          - employee
+
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    environment: dev
+    env:
+      ADMIN_USERNAME: ${{ vars.ADMIN_USERNAME }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      PROJECT: ${{ github.event.inputs.project || 'admin' }}
+      GREP: ${{ github.event.inputs.grep || '' }}
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      env:
-        GREP: ${{ github.event.inputs.grep }}
-        ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
-        ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-      run: |
-        if [ -n "$GREP" ]; then
-          npx playwright test --grep "$GREP" --project="admin"
-        else
-          npx playwright test --project="admin"
-        fi
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: |
+          echo "Starting playwright tests..."
+          echo "Project selected: $PROJECT"
+          echo "Playwright filter: $GREP"
+          if [ -n "$GREP" ]; then
+            npx playwright test --grep "$GREP" --project="$PROJECT"
+          else
+            npx playwright test --project="$PROJECT"
+          fi
+          echo "Playwright test finished..."
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
