@@ -48,9 +48,9 @@ jobs:
           echo "Project selected: $PROJECT"
           echo "Playwright filter: $GREP"
           if [ -n "$GREP" ]; then
-            npx playwright test --grep "$GREP" --project="$PROJECT"
+            npx playwright test --grep "$GREP" --project="$PROJECT" --reporter=list,html
           else
-            npx playwright test --project="$PROJECT"
+            npx playwright test --project="$PROJECT" --reporter=list,html
           fi
           echo "Playwright test finished..."
 

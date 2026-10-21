@@ -9,8 +9,7 @@ import { UserFactory } from "../factory/UserFactory"
 import { Usertable } from "../components/UserTable"
 test('Get all the employee names registered', async ({page}) => {
  
-    const loginPage = new LoginPage(page)
-    await loginPage.doLogin('Admin', 'admin123')
+    await page.goto('/web/index.php/dashboard/index')
 
     await expect(page.getByRole('link', {name: 'Admin'})).toBeVisible()
     await page.getByRole("link", {name: 'Admin'}). click()
@@ -48,10 +47,7 @@ console.log(employeeNames)
 test('Select specific user for edition', async ({page}) => {
 
     const userForEdition = 'abcda';
-    await page.goto('https://opensource-demo.orangehrmlive.com/');
-    await page.getByRole('textbox', {name: 'Username'}).fill('Admin');
-    await page.getByRole('textbox', {name: 'Password'}).fill('admin123');
-    await page.getByRole('button', {name: 'Login'}).click();
+     await page.goto('/web/index.php/dashboard/index');
 
     await expect(page.getByRole('link', {name: 'Admin'})).toBeVisible();
     await page.getByRole('link', {name: 'Admin'}).click();
@@ -76,9 +72,7 @@ test('Check user role options', async({page}) =>{
 
   const expecteRoleOptions = ['-- Select --', 'Admin', 'ESS']
 
-
-  const loginPage = new LoginPage(page)
-  await loginPage.loginAsAdmin()
+  await page.goto('/web/index.php/dashboard/index')
 
   const sidePanel = new SidePanel(page)
   await sidePanel.clickonOption(SideMenuOption.ADMIN)
@@ -96,8 +90,7 @@ test('Check user role options', async({page}) =>{
 
 
 test('Filter by user admin', async ({ page }) => {
-    const loginPage = new LoginPage(page)
-    await loginPage.loginAsAdmin()
+     await page.goto('/web/index.php/dashboard/index')
 
 
     const sidePanel = new SidePanel(page)
