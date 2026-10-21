@@ -1,4 +1,4 @@
-nname: Playwright Tests
+name: Playwright Tests
 on:
   workflow_dispatch:
     inputs:
@@ -18,12 +18,14 @@ jobs:
       run: npm ci
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
-        - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
     - name: Run Playwright tests
+      env:
+        GREP: ${{ github.event.inputs.grep }}
+        ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+        ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
       run: |
-        if [ -n "${{github.event.inputs.grep}}" ]; then
-          npx playwright test --grep "${{github.event.inputs.grep}}" --project="admin"
+        if [ -n "$GREP" ]; then
+          npx playwright test --grep "$GREP" --project="admin"
         else
           npx playwright test --project="admin"
         fi
