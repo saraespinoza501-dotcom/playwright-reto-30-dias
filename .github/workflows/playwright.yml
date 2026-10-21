@@ -1,12 +1,10 @@
-name: Playwright Tests
+nname: Playwright Tests
 on:
-workflow_dispatch:
-inputs:
-grep:
-description: "Campo opcional para filtrar los test de playwright"
-required: false
-default: ''
-type: string
+  workflow_dispatch:
+    inputs:
+      grep:
+        description: 'Nombre del test a ejecutar (opcional)'
+        required: false
 jobs:
   test:
     timeout-minutes: 60
@@ -20,13 +18,15 @@ jobs:
       run: npm ci
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+        - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
     - name: Run Playwright tests
       run: |
-  if [ -n "${{github.event.inputs.grep}}" ]; then
-    npx playwright test --grep "${{github.event.inputs.grep}}" --project="admin"
-  else
-    npx playwright test --project="admin"
-  fi
+        if [ -n "${{github.event.inputs.grep}}" ]; then
+          npx playwright test --grep "${{github.event.inputs.grep}}" --project="admin"
+        else
+          npx playwright test --project="admin"
+        fi
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
