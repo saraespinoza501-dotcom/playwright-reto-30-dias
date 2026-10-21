@@ -19,15 +19,13 @@ on:
         type: choice
         options:
           - admin
-          - employee
 
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    environment: dev
     env:
-      ADMIN_USERNAME: ${{ vars.ADMIN_USERNAME }}
+      ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
       PROJECT: ${{ github.event.inputs.project || 'admin' }}
       GREP: ${{ github.event.inputs.grep || '' }}
